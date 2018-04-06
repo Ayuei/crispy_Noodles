@@ -1,0 +1,6 @@
+{
+	"learning_rate": 0.01,
+	"epochs": 100,
+	"graph": false,
+	"data_path": "data/"
+}
