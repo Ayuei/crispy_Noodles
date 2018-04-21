@@ -42,7 +42,7 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-nn = MLP.MLP([128, 64, 9], 'relu')
+nn = MLP.MLP([128, 64, 9], 'softmax')
 
 train, label, test = load_data(data_dir)
 
