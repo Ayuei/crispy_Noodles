@@ -31,8 +31,7 @@ class Activation(object):
         return loss
 
     def _softmax_deriv(self, softmax):
-        s = softmax.reshape(-1, 1)
-        return np.diagflat(s) - np.dot(s, s.T)
+        return softmax - np.power(softmax, 2)
 
     def __init__(self, activation='relu'):
         if activation == 'relu':

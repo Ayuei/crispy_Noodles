@@ -40,6 +40,18 @@ class MLP:
 
         return np.sum(loss), delta
 
+    def cross_entropy_loss_softmax(self, y, y_hat):
+        activation_deriv = Activation(self.activation).f_deriv
+
+        error = -np.sum(y*np.log(y_hat))
+
+        delta = error*activation_deriv(y_hat)
+
+        return error, delta
+
+
+
+
     def backward(self, delta):
         for layer in reversed(self.layers):
             delta = layer.backward(delta)
@@ -73,7 +85,8 @@ class MLP:
                 #loss[it], delta = self.criterion_MSE(y[i], y_hat)
                 grd_trth = np.array([0 for i in range(y.max())])
                 grd_trth[y[i]-1] = 1
-                loss[it], delta = self.criterion_MSE(grd_trth, y_hat)
+                loss[it], delta = self.cross_entropy_loss_softmax(grd_trth, y_hat)
+                #loss[it], delta = self.criterion_MSE(grd_trth, y_hat)
                 self.backward(delta)
 
                 # update
