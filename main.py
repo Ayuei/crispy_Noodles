@@ -4,6 +4,18 @@ import h5py
 import numpy as np
 import random
 
+def accuracy(nn_, test_, lbs_):
+    score = 0
+    for x, label in zip(test_, lbs_):
+        t = nn_.predict(x)
+        dummy_var = np.argmax(nn_.predict(x))+1
+        if label == np.argmax(nn_.predict(x))+1:
+            score += 1
+
+    return score/len(test)
+
+
+
 def load_data(data_dir='data/'):
     data = []
     label = []
@@ -30,15 +42,15 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-nn = MLP.MLP([128, 64, 1], 'relu')
+nn = MLP.MLP([128, 64, 9], 'relu')
 
 train, label, test = load_data(data_dir)
 
 indices = list(range(len(train)))
-indices = random.shuffle(indices)
+random.shuffle(indices)
 
-train = map(train.__getitem__, indices)
-label = map(label.__getitem__, indices)
+train = list(map(train.__getitem__, indices))
+label = list(map(label.__getitem__, indices))
 test = train[1001:2000]
 test_label = label[1001:2000]
 
@@ -49,5 +61,4 @@ MSE = nn.fit(train[0:1000], label[0:1000], learning_rate=learning_rate,
 #Need to change how everything works as it's no longer binary...
 #argmax...
 
-print(MSE[len(MSE)-10:-1])
-print(MSE[-1])
+print('Accuracy is: '+str(accuracy(nn, test, test_label)))

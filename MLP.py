@@ -26,6 +26,9 @@ class MLP:
             input = output
         return output
 
+    #def softmax(self, y, y_hat):
+
+
     def criterion_MSE(self, y, y_hat):
         activation_deriv = Activation(self.activation).f_deriv
         # MSE
@@ -34,7 +37,8 @@ class MLP:
         # write down the delta in the last layer
         delta = error * activation_deriv(y_hat)
         # return loss and delta
-        return loss, delta
+
+        return np.sum(loss), delta
 
     def backward(self, delta):
         for layer in reversed(self.layers):
@@ -67,7 +71,9 @@ class MLP:
 
                 # backward pass
                 #loss[it], delta = self.criterion_MSE(y[i], y_hat)
-                loss[it], delta = self.criterion_MSE(y[i], y_hat)
+                grd_trth = np.array([0 for i in range(y.max())])
+                grd_trth[y[i]-1] = 1
+                loss[it], delta = self.criterion_MSE(grd_trth, y_hat)
                 self.backward(delta)
 
                 # update
@@ -77,7 +83,5 @@ class MLP:
 
     def predict(self, x):
         x = np.array(x)
-        output = np.zeros(x.shape[0])
-        for i in np.arange(x.shape[0]):
-            output[i] = nn.forward(x[i, :])
-        return output
+
+        return self.forward(x)
