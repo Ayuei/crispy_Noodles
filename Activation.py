@@ -9,8 +9,8 @@ class Activation(object):
     def _relu_deriv(self, x):
         x_copy = cp.deepcopy(x)
 
-        x_copy[x_copy<=0] = 0
-        x_copy[x_copy>0] = 1
+        x_copy[x_copy <= 0] = 0
+        x_copy[x_copy > 0] = 1
 
         return x_copy
 

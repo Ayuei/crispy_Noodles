@@ -2,6 +2,7 @@ import MLP
 import json
 import h5py
 import numpy as np
+import random
 
 def load_data(data_dir='data/'):
     data = []
@@ -29,12 +30,24 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-nn = MLP.MLP([128,1], 'relu')
+nn = MLP.MLP([128, 64, 1], 'relu')
 
 train, label, test = load_data(data_dir)
 
-MSE = nn.fit(train, test, learning_rate=learning_rate,
+indices = list(range(len(train)))
+indices = random.shuffle(indices)
+
+train = map(train.__getitem__, indices)
+label = map(label.__getitem__, indices)
+test = train[1001:2000]
+test_label = label[1001:2000]
+
+MSE = nn.fit(train[0:1000], label[0:1000], learning_rate=learning_rate,
              epochs=epochs)
+
+#Change to 9 output neurons, and get max of the neuron that activates?
+#Need to change how everything works as it's no longer binary...
+#argmax...
 
 print(MSE[len(MSE)-10:-1])
 print(MSE[-1])
