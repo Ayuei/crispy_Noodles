@@ -5,7 +5,7 @@ import numpy as np
 class MLP:
     """
     """
-    def __init__(self, layers, activation='relu'):
+    def __init__(self, layers, activation='relu', final_layer_activation='softmax'):
         """
         :param layers: A list containing the number of units in each layer.
         Should be at least two values
@@ -16,9 +16,12 @@ class MLP:
         self.layers = []
         self.params = []
 
-        self.activation = activation
+        self.activation = final_layer_activation
         for i in range(len(layers) - 1):
             self.layers.append(HiddenLayer(layers[i], layers[i + 1], activation=activation))
+
+    def add_layer(self, n_in, n_out, activation):
+        self.layers.append(HiddenLayer(n_in, n_out, activation=activation))
 
     def forward(self, input):
         for layer in self.layers:
@@ -43,13 +46,14 @@ class MLP:
     def cross_entropy_loss_softmax(self, y, y_hat):
         activation_deriv = Activation(self.activation).f_deriv
 
-        error = -np.sum(y*np.log(y_hat))
+        #Log 0 correction
+        y_hat[y_hat == 0] = 0.0000001
+
+        error = np.sum(y*np.log(y_hat))
 
         delta = error*activation_deriv(y_hat)
 
         return error, delta
-
-
 
 
     def backward(self, delta):
@@ -74,6 +78,7 @@ class MLP:
         to_return = np.zeros(epochs)
 
         for k in range(epochs):
+            print('Starting epoch: '+str(k))
             loss = np.zeros(X.shape[0])
             for it in range(X.shape[0]):
                 i = np.random.randint(X.shape[0])
@@ -88,10 +93,10 @@ class MLP:
                 loss[it], delta = self.cross_entropy_loss_softmax(grd_trth, y_hat)
                 #loss[it], delta = self.criterion_MSE(grd_trth, y_hat)
                 self.backward(delta)
-
                 # update
                 self.update(learning_rate)
             to_return[k] = np.mean(loss)
+            print(np.mean(loss))
         return to_return
 
     def predict(self, x):

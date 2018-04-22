@@ -51,10 +51,10 @@ random.shuffle(indices)
 
 train = list(map(train.__getitem__, indices))
 label = list(map(label.__getitem__, indices))
-test = train[1001:2000]
-test_label = label[1001:2000]
+test = train[50000:]
+test_label = label[50000:]
 
-MSE = nn.fit(train[0:1000], label[0:1000], learning_rate=learning_rate,
+MSE = nn.fit(train[0:50000], label[0:50000], learning_rate=learning_rate,
              epochs=epochs)
 
 #Change to 9 output neurons, and get max of the neuron that activates?
