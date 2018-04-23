@@ -38,15 +38,23 @@ class HiddenLayer(object):
         #        compared to tanh
         #        We have no info for other function, so we use the same as
         #        tanh.
-        self.W = np.random.uniform(
-            low=-np.sqrt(6. / (n_in + n_out)),
-            high=np.sqrt(6. / (n_in + n_out)),
-            size=(n_in, n_out)
-        )
-        if activation == 'logistic':
-            W_values *= 4
 
-        self.b = np.zeros(n_out, )
+        #self.W = np.random.uniform(
+        #    low=-np.sqrt(6. / (n_in + n_out)),
+        #    high=np.sqrt(6. / (n_in + n_out)),
+        #    size=(n_in, n_out)
+        #)
+
+         self.W = np.random.uniform(
+            low=-4,
+            high=4,
+            size=(n_neurons)
+         )
+
+        #if activation == 'logistic':
+        #    W_values *= 4
+
+        self.b = np.zeros(n_neurons)
 
         self.grad_W = np.zeros(self.W.shape)
         self.grad_b = np.zeros(self.b.shape)

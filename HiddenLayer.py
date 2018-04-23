@@ -39,8 +39,8 @@ class HiddenLayer(object):
         #        We have no info for other function, so we use the same as
         #        tanh.
         self.W = np.random.uniform(
-            low=-np.sqrt(6. / (n_in + n_out)),
-            high=np.sqrt(6. / (n_in + n_out)),
+            low=-4,
+            high=4,
             size=(n_in, n_out)
         )
         if activation == 'logistic':

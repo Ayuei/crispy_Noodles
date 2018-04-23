@@ -19,6 +19,7 @@ class MLP:
         self.activation = final_layer_activation
         for i in range(len(layers) - 1):
             self.layers.append(HiddenLayer(layers[i], layers[i + 1], activation=activation))
+        self.layers[-1] = HiddenLayer(layers[i], layers[i+1], activation=final_layer_activation)
 
     def add_layer(self, n_in, n_out, activation):
         self.layers.append(HiddenLayer(n_in, n_out, activation=activation))
