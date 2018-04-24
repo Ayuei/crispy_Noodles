@@ -1,6 +1,6 @@
-import MLP
-import json
+from sequential import Sequential, Layer
 import h5py
+import json
 import numpy as np
 import random
 
@@ -13,8 +13,6 @@ def accuracy(nn_, test_, lbs_):
             score += 1
 
     return score/len(test)
-
-
 
 def load_data(data_dir='data/'):
     data = []
@@ -31,9 +29,6 @@ def load_data(data_dir='data/'):
         test = np.copy(H['data'])
 
     return data, label, test
-## Define how to input data
-## How are they labelled etc
-## How to split?
 
 config = json.load(open('config.json', 'r'))
 
@@ -42,23 +37,27 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-nn = MLP.MLP([128, 64, 9])
+nn = Sequential(learning_rate=learning_rate, epochs=1)
 
 train, label, test = load_data(data_dir)
 
+nn.add_layer(n=400, in_shape=train.shape[1])
+
+nn.add_layer(n=100)
+nn.add_layer(n=9, activation="softmax")
+nn.compile(loss="cross_entropy")
+
 indices = list(range(len(train)))
 random.shuffle(indices)
+
+#normalize
+train = train / 255
 
 train = list(map(train.__getitem__, indices))
 label = list(map(label.__getitem__, indices))
 test = train[50000:]
 test_label = label[50000:]
 
-MSE = nn.fit(train[0:50000], label[0:50000], learning_rate=learning_rate,
-             epochs=epochs)
-
-#Change to 9 output neurons, and get max of the neuron that activates?
-#Need to change how everything works as it's no longer binary...
-#argmax...
+nn.fit(train[0:50000], label[0:50000])
 
 print('Accuracy is: '+str(accuracy(nn, test, test_label)))

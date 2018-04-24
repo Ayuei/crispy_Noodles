@@ -1,14 +1,14 @@
 import numpy as np
 
 
-class MSE():
+class mean_squared_error():
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
     def __loss__(self, y_hat, y):
         return np.sum(np.abs(np.power(y_hat-y, 2)))
 
-class CrossEntropy():
+class cross_entropy():
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
@@ -17,5 +17,9 @@ class CrossEntropy():
         params: y_hat (predicted)
                 y (ground truth)
         '''
-        return np.sum(y_hat*np.log(y)+(1-y)*np.log(1-y_hat))
+
+        #Avoid log(0)
+        y_hat[y_hat == 0.0] = (np.min(y_hat[np.nonzero(y_hat)]))
+
+        return np.log(y_hat) * y
 
