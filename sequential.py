@@ -85,7 +85,7 @@ class Sequential():
 
 
     def get_batches(self, X, Y):
-        m = X.shape[0]f
+        m = X.shape[0]
         mini_batches = []
 
         permutation = list(np.random.permutation(m))
@@ -100,7 +100,7 @@ class Sequential():
             mini_batch = (mini_batch_X, mini_batch_Y)
             mini_batches.append(mini_batch)
 
-        if m % batchsize != 0:
+        if m % self.batch_size != 0:
             mini_batch_X = shuffled_X[-(m % self.batch_size): m]
             mini_batch_Y = shuffled_Y[-(m % self.batch_size): m]
             mini_batch = (mini_batch_X, mini_batch_Y)
