@@ -1,25 +1,30 @@
 import numpy as np
+from abc import ABC, abstractmethod
 
-
-class mean_squared_error():
-    def __init__(self, **kwargs):
+class loss(ABC):
+    def __init(self, **kwargs):
         self.kwargs = kwargs
 
-    def __loss__(self, y_hat, y):
+    @abstractmethod
+    def loss(self, y_hat, y):
+        pass
+
+    @abstractmethod
+    def grad(self, y_hat, y):
+        pass
+
+class mean_squared_error(loss):
+    def loss(self, y_hat, y):
         return np.sum(np.abs(np.power(y_hat-y, 2)))
 
-class cross_entropy():
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
 
-    def __loss__(self, y_hat, y):
-        '''
-        params: y_hat (predicted)
-                y (ground truth)
-        '''
+    def grad(self, y_hat, y):
+        return np.abs(y_hat - y)
 
-        #Avoid log(0)
-        y_hat[y_hat == 0.0] = (np.min(y_hat[np.nonzero(y_hat)]))
+class cross_entropy_softmax(loss):
+    def loss(self, y_hat, y):
+        print(y_hat)
+        return -np.sum(np.log(y_hat) * y)
 
-        return np.log(y_hat) * y
-
+    def grad(self, y_hat, y):
+        return y_hat - y

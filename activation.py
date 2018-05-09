@@ -1,40 +1,58 @@
 import numpy as np
 import copy
+from abc import ABC, abstractmethod
 
-class relu():
+class activation(ABC):
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
 
-    def __activate__(self, x):
+    @abstractmethod
+    def activate(self, x):
+        pass
+    
+    @abstractmethod
+    def deriv(self, x):
+        pass    
+
+class relu(activation):
+
+    def activate(self, x):
         return np.maximum(x,0)
 
-    def __deriv__(self,x):
+    def deriv(self, x):
 
         x[x <= 0] = 0
         x[x > 0] = 1
 
         return x
 
-class leaky_relu():
+class leaky_relu(activation):
 
-    def __activate__(self, x, alpha=0.01):
+    def activate(self, x, alpha=0.1):
         y = copy.deepcopy(x)
-
         x[x <= 0] = alpha
-        x[x > 0] = 1
 
         return x*y
 
-    def __deriv__(self, x, alpha=0.01):
-
+    def deriv(self, x, alpha=0.1):
+        
         x[x <= 0] = alpha
         x[x > 0] = 1
-
+        
         return x
 
 class softmax():
 
-    def __activate__(self, X):
+    def activate(self, X):
+
         exps = np.exp(X - np.max(X))
-        return exps / np.sum(exps)
+        #x = np.max(X)
+        output = exps / np.sum(exps)
+
+        return output
 
     def __deriv__(self, X):
-        return X - np.power(X, 2)
+
+        X = self.activate(X)
+
+        return np.diagflat(X) - np.dot(X, X.T)
