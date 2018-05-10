@@ -2,7 +2,10 @@ import numpy as np
 from activation import *
 from loss import *
 from layers import *
+from optimisers import *
+from copy import deepcopy
 
+global_time_step = 0
 
 class Sequential():
 
@@ -29,10 +32,11 @@ class Sequential():
 
     def backward(self, delta):
         for i, layer in enumerate(reversed(self.layers)):
+            self.increment_global_time_step()
             if i == 0:
-                delta = layer.backward(delta, True)
+                delta = layer.backward(delta, last_layer=True, global_time_step=global_time_step)
             else:
-                delta = layer.backward(delta)
+                delta = layer.backward(delta, last_layer=False, global_time_step=global_time_step)
 
     def update(self):
         for layer in self.layers:
@@ -43,14 +47,26 @@ class Sequential():
     def compile(self, loss="cross_entropy_softmax", optimiser=None):
         if loss in globals().keys():
             self.loss = globals()[loss]()
+
         else:
             raise NotImplementedError()
 
-    def fit(self, X, y):
+        if optimiser is None:
+            return
+
+        if optimiser in globals().keys():
+            self.optimiser = globals()[optimiser]
+            for i, layer in enumerate(self.layers):
+                if type(layer).__name__ == "Dense":
+                    self.layers[i] = self.optimiser(layer)
+
+    def fit(self, X, y, verbose=True):
         
         for k in range(self.epochs):
-            print('Starting epoch: '+str(k))
+            print('=====================')
+            print('EPOCH: '+str(k)+'/'+str(self.epochs))
             loss = np.zeros(X.shape[0])
+            correct_instances = 0
             batches = self.get_batches(X,y)
             for i in range(len(batches)):
 
@@ -60,17 +76,18 @@ class Sequential():
                 loss_ = self.loss.loss(y_hat, batch_Y)
                 loss[i] = np.mean(loss_)
 
-                delta = self.loss.grad(y_hat, batch_Y)
+                if verbose:
+                    correct_instances += np.sum(np.argmax(y_hat,axis=1) == np.argmax(batch_Y,axis=1))
 
-                if i % 1000 == 0:
-                    print(y_hat)
-                    print('Loss at item %s is %s' % (i, loss[i]))
+                delta = self.loss.grad(y_hat, batch_Y)
                 
                 self.backward(delta)
                 self.update()
             
             print('=====================')
-            print("Current mean loss:"+ str(np.mean(loss)))
+            print("Current mean loss:", np.mean(loss))
+            if verbose:
+                print("Current training acc:", correct_instances/X.shape[0])
             
             
     def predict(self, x):
@@ -103,3 +120,6 @@ class Sequential():
 
         return mini_batches
 
+    def increment_global_time_step(self):
+        global global_time_step
+        global_time_step += 1

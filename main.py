@@ -55,21 +55,24 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-learning_rate = 0.01
+learning_rate = 0.001
 
-nn = Sequential(learning_rate=learning_rate, epochs=5, batch_size=34)
+nn = Sequential(learning_rate=learning_rate, epochs=10, batch_size=100)
 
 train, label, test = load_data(data_dir)
 
 nn.add(Dense(n=80, in_shape=train.shape[1]))
-nn.add(Dropout(0.5))
+nn.add(Batch_norm())
 nn.add(Dense(n=100))
-nn.add(Dropout(0.5))
+nn.add(Batch_norm())
+nn.add(Dense(n=50))
+nn.add(Batch_norm())
 nn.add(Dense(n=100))
-nn.add(Dropout(0.5))
+nn.add(Batch_norm())
 nn.add(Dense(n=100))
+nn.add(Batch_norm())
 nn.add(Dense(n=10, activation="softmax"))
-nn.compile(loss="cross_entropy_softmax")
+nn.compile(loss="cross_entropy_softmax", optimiser="adam")
 
 indices = list(range(len(train)))
 random.shuffle(indices)
@@ -80,6 +83,6 @@ label = list(map(label.__getitem__, indices))
 X = scale_data(train)
 y = np.array(onehot_labels(label), dtype=np.float64)
 
-nn.fit(X[0:50000], y[0:50000])
+nn.fit(X[0:50000], y[0:50000], verbose=True)
 
 print('Accuracy is: '+str(accuracy(nn, X[50000:], label[50000:])))

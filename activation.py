@@ -17,7 +17,7 @@ class activation(ABC):
 class relu(activation):
 
     def activate(self, x):
-        return np.maximum(x,0)
+        return np.maximum(x, 0)
 
     def deriv(self, x):
 
@@ -49,7 +49,9 @@ class softmax():
 
         return exps/np.sum(exps, axis=1, keepdims=True)
 
-    def __deriv__(self, X):
+    def deriv(self, X):
+
+        print('Most likely a bug that you\'re differentiating the softmax...')
 
         X = self.activate(X)
 

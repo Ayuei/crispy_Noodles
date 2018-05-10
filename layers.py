@@ -52,7 +52,7 @@ class Dropout(Layer):
     def create_weights(self, in_shape):
         pass
 
-    def backward(self, inp):
+    def backward(self, inp, **args):
         return inp*(1+self.dropout_rate)
 
     def update(self, *args):
@@ -92,7 +92,7 @@ class Dense(Layer):
 
         return output
 
-    def backward(self, delta, last_layer=False):
+    def backward(self, delta, last_layer=False, **args):
 
         if not last_layer:
             delta = delta*self.activation.deriv(self.output)
@@ -108,30 +108,44 @@ class Dense(Layer):
 
 
 class Batch_norm(Layer):
-    def __init__(self, in_shape, out_shape, epsilon=1e-16):
-        self.gamma = np.ones(shape=(in_shape))
-        self.beta = np.zeros(shape=(in_shape))
-        self.in_shape = in_shape
-        self.out_shape = out_shape
+    def __init__(self, epsilon=1e-16, momentum=0.9):
         self.epsilon=epsilon
         self.x_hat = None
         self.x_mu = None
         self.inv_var = None
         self.sqrtvar = None
         self.var = None
+        self.momentum = momentum
+        self.moving_mean = None
+        self.moving_var = None
 
     def forward(self, X, **kwargs):
-        self.mu = np.mean(X, axis=0)
-        self.var = np.var(X, axis=0)
-
-        self.X_norm = (X - self.mu) / np.sqrt(self.var + self.epsilon)
-        output = self.gamma * self.X_norm + self.beta
 
         self.X = X
 
+        if ("predict" in kwargs and not kwargs["predict"]) or \
+                "predict" not in kwargs:
+            self.mu = np.mean(X, axis=0)
+            self.var = np.var(X, axis=0)
+            self.X_norm = (X - self.mu) * 1.0 / np.sqrt(self.var + self.epsilon)
+        else:
+            self.X_norm = (X - self.moving_mean) * 1.0 / np.sqrt(self.moving_var + self.epsilon)
+
+        output = self.X_norm * self.gamma + self.beta
+
+        if self.moving_mean is None:
+            self.moving_mean = self.mu
+            self.moving_var = self.var
+            print('Moving averages initialised')
+
+            return output
+
+        self.moving_mean = self.moving_mean * self.momentum + self.mu * (1-self.momentum)
+        self.moving_var = self.moving_var * self.momentum + self.var * (1-self.momentum)
+
         return output
 
-    def backward(self, delta):
+    def backward(self, delta, **args):
         N, D = self.X.shape
 
         X_mu = self.X - self.mu
@@ -148,7 +162,8 @@ class Batch_norm(Layer):
         return delta
 
     def create_weights(self, in_shape):
-        pass
+        self.gamma = np.ones(shape=(in_shape))
+        self.beta = np.zeros(shape=(in_shape))
 
     def update(self, learning_rate):
         self.gamma -= learning_rate*self.dgamma
