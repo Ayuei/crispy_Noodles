@@ -62,10 +62,10 @@ Ytrain = y[:59000]
 Xtest = X[59000:60000] #unseen
 Ytest = np.array(label)[59000:60000] #unseen
 
-layers_dim = [128, 36, 22, 8, 10]
+layers_dim = [128, 64, 32, 16, 8, 8, 10]
 
 model = nn.Model(layers_dim)
-model.train(Xtrain, Ytrain, num_passes=3001, epsilon=0.0005, reg_lambda=0.02, print_loss=True)
+model.train(Xtrain, Ytrain, num_passes=3001, epsilon=0.0002, reg_lambda=0.01, print_loss=True)
 
 testUnseenFrame, testUnseenAcc = generatePredictionScore(model, Xtest, Ytest)
 

@@ -10,8 +10,8 @@ from layers import *
 def accuracy(nn_, test_, lbs_):
     score = 0
     for x, label in zip(test_, lbs_):
-        t = nn_.predict(x)
-        dummy_var = np.argmax(nn_.predict(x))
+        #t = nn_.predict(x)
+        #dummy_var = np.argmax(nn_.predict(x))
         if label == np.argmax(nn_.predict(x)):
             score += 1
 
@@ -41,7 +41,6 @@ def load_data(data_dir='data/'):
 
     return data, label, test
 
-
 def scale_data(data):
     X = np.array(data, dtype=np.float64)
     scaler = MinMaxScaler()
@@ -56,19 +55,18 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-learning_rate = 0.001
+learning_rate = 0.01
 
-nn = Sequential(learning_rate=learning_rate, epochs=50)
+nn = Sequential(learning_rate=learning_rate, epochs=5, batch_size=34)
 
 train, label, test = load_data(data_dir)
 
-nn.add(Dense(n=60, in_shape=train.shape[1]))
+nn.add(Dense(n=80, in_shape=train.shape[1]))
+nn.add(Dropout(0.5))
 nn.add(Dense(n=100))
-nn.add(Dropout(0.3))
+nn.add(Dropout(0.5))
 nn.add(Dense(n=100))
-nn.add(Dropout(0.3))
-nn.add(Dense(n=100))
-nn.add(Dropout(0.3))
+nn.add(Dropout(0.5))
 nn.add(Dense(n=100))
 nn.add(Dense(n=10, activation="softmax"))
 nn.compile(loss="cross_entropy_softmax")

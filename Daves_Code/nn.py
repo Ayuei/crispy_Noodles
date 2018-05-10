@@ -35,6 +35,9 @@ class Model:
 
     def train(self, X, y, num_passes=1000, epsilon=0.01, reg_lambda=0.01, print_loss=False):
         epochLoss = []
+        t = 0
+        beta1 = 0.9
+        beta2 = 0.999
         for epoch in range(num_passes):
             # Forward propagation
             minibatches = self.MB.mini_batches(X, y, 50)
@@ -54,15 +57,19 @@ class Model:
                 batchLoss.append(loss)
                 
                 for i, layer in enumerate(reversed(self.layers)):
+                    t = t + 1
                     ix = len(self.layers) - i
                     delta = layer.backward(ix,
                                                delta, 
                                                epsilon, 
-                                               reg_lambda)
+                                               reg_lambda,
+                                               beta1,
+                                               beta2,
+                                               t)
                     
             epochLoss.append(np.mean(batchLoss))
             
-            if print_loss and epoch % 100 == 0:
+            if print_loss and epoch % 50 == 0:
                 print("Loss after iteration %i: %f" %(epoch, self.calculate_loss(X, y)))
             
         return epochLoss

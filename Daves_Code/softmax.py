@@ -16,7 +16,7 @@ class Softmax:
             
         corect_logprobs = -np.log(probs[range(num_examples), yg])
         
-        loss = np.mean(corect_logprobs) - 1
+        loss = np.mean(corect_logprobs)
         
         return loss
 

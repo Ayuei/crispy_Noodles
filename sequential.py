@@ -21,9 +21,9 @@ class Sequential():
         except AttributeError:
             pass
 
-    def forward_pass(self, inp):
+    def forward_pass(self, inp, **kwargs):
         for layer in self.layers:
-            output = layer.forward(inp)
+            output = layer.forward(inp, **kwargs)
             inp = output
         return output
 
@@ -36,8 +36,9 @@ class Sequential():
 
     def update(self):
         for layer in self.layers:
-            layer.W -= self.learning_rate*layer.grad_W
-            layer.b -= self.learning_rate*layer.grad_b
+            layer.update(self.learning_rate)
+
+
 
     def compile(self, loss="cross_entropy_softmax", optimiser=None):
         if loss in globals().keys():
@@ -56,15 +57,11 @@ class Sequential():
                 batch_X, batch_Y = batches[i]
 
                 y_hat = self.forward_pass(batch_X)
-                
-                #CHANGE 3
                 loss_ = self.loss.loss(y_hat, batch_Y)
-                
-                #CHANGE 4
                 loss[i] = np.mean(loss_)
+
                 delta = self.loss.grad(y_hat, batch_Y)
 
-                #CHANGE 5
                 if i % 1000 == 0:
                     print(y_hat)
                     print('Loss at item %s is %s' % (i, loss[i]))
@@ -79,7 +76,7 @@ class Sequential():
     def predict(self, x):
         x = np.array(x)
 
-        return self.forward_pass(x)
+        return self.forward_pass(x, predict=True)
 
 
     def get_batches(self, X, Y):
@@ -105,3 +102,4 @@ class Sequential():
             mini_batches.append(mini_batch)
 
         return mini_batches
+
