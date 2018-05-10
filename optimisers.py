@@ -1,7 +1,7 @@
 import numpy as np
 
 class Adam:
-    def __init__(self, layer, regularization=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8):
+    def __init__(self, layer, regularization=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8, weight_decay=0.01):
         self.reg = regularization
         self.beta1 = beta1
         self.beta2 = beta2
@@ -11,6 +11,7 @@ class Adam:
         self.s_db = np.zeros((np.shape(layer.b)))
         self.layer = layer
         self.epsilon = epsilon
+        self.weight_decay = weight_decay
 
     def backward(self, delta, **kwargs):
 
@@ -41,15 +42,16 @@ class Adam:
         return self.layer.forward(X)
 
     def update(self, lr):
-        self.layer.W = self.layer.W - (lr * (self.vcW / (np.sqrt(self.scW) + self.epsilon)))
-        self.layer.b = self.layer.b - (lr * (self.vcb / (np.sqrt(self.scb) + self.epsilon)))
+        self.layer.W = self.layer.W - (lr * (self.vcW / (np.sqrt(self.scW) + self.epsilon))) - self.layer.W*self.weight_decay*lr
+        self.layer.b = self.layer.b - (lr * (self.vcb / (np.sqrt(self.scb) + self.epsilon))) - self.layer.b*self.weight_decay*lr
 
 class SGDMomentum:
-    def __init__(self, layer, gamma=0.9):
+    def __init__(self, layer, gamma=0.9, weight_decay=0.01):
         self.gamma = gamma
         self.layer = layer
         self.velocity = None
         self.velocity_b = None
+        self.weight_decay = weight_decay
 
     def forward(self, X, **kwargs):
         return self.layer.forward(X)
@@ -71,5 +73,5 @@ class SGDMomentum:
         self.layer.grad_W -= self.velocity
         self.layer.grad_b -= self.velocity_b
 
-        self.layer.W = self.layer.W - (lr*self.layer.grad_W)
-        self.layer.b = self.layer.b - (lr*self.layer.grad_b)
+        self.layer.W = self.layer.W - (lr*self.layer.grad_W) - self.layer.W*self.weight_decay*lr
+        self.layer.b = self.layer.b - (lr*self.layer.grad_b) - self.layer.b*self.weight_decay*lr
