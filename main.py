@@ -57,22 +57,24 @@ data_dir = config['data_path']
 
 learning_rate = 0.001
 
-nn = Sequential(learning_rate=learning_rate, epochs=10, batch_size=100)
+nn = Sequential(learning_rate=learning_rate, epochs=50, batch_size=100)
 
 train, label, test = load_data(data_dir)
 
-nn.add(Dense(n=80, in_shape=train.shape[1]))
+nn.add(Dense(n=200, in_shape=train.shape[1]))
 nn.add(Batch_norm())
 nn.add(Dense(n=100))
 nn.add(Batch_norm())
-nn.add(Dense(n=50))
+nn.add(Dense(n=60))
+nn.add(Dropout(0.5))
+nn.add(Dense(n=60))
 nn.add(Batch_norm())
 nn.add(Dense(n=100))
 nn.add(Batch_norm())
-nn.add(Dense(n=100))
+nn.add(Dense(n=200))
 nn.add(Batch_norm())
 nn.add(Dense(n=10, activation="softmax"))
-nn.compile(loss="cross_entropy_softmax", optimiser="adam")
+nn.compile(loss="cross_entropy_softmax", optimiser="SGDMomentum")
 
 indices = list(range(len(train)))
 random.shuffle(indices)

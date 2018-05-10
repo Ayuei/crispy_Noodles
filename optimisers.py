@@ -1,7 +1,7 @@
 import numpy as np
 
-class adam:
-    def __init__(self, layer, regularization=0.01, beta1=0.9, beta2=0.999, epsilon=0.01):
+class Adam:
+    def __init__(self, layer, regularization=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8):
         self.reg = regularization
         self.beta1 = beta1
         self.beta2 = beta2
@@ -43,3 +43,33 @@ class adam:
     def update(self, lr):
         self.layer.W = self.layer.W - (lr * (self.vcW / (np.sqrt(self.scW) + self.epsilon)))
         self.layer.b = self.layer.b - (lr * (self.vcb / (np.sqrt(self.scb) + self.epsilon)))
+
+class SGDMomentum:
+    def __init__(self, layer, gamma=0.9):
+        self.gamma = gamma
+        self.layer = layer
+        self.velocity = None
+        self.velocity_b = None
+
+    def forward(self, X, **kwargs):
+        return self.layer.forward(X)
+
+    def backward(self, delta, **kwargs):
+        last_layer = kwargs["last_layer"]
+
+        delta = self.layer.backward(delta, last_layer)
+
+        return delta
+
+    def update(self, lr):
+        if self.velocity is None:
+            self.velocity = np.zeros_like(self.layer.grad_W)
+            self.velocity_b = np.zeros_like(self.layer.grad_b)
+
+        self.velocity = self.gamma * self.velocity + lr * self.layer.grad_W
+        self.velocity_b = self.gamma * self.velocity_b + lr * self.layer.grad_b
+        self.layer.grad_W -= self.velocity
+        self.layer.grad_b -= self.velocity_b
+
+        self.layer.W = self.layer.W - (lr*self.layer.grad_W)
+        self.layer.b = self.layer.b - (lr*self.layer.grad_b)

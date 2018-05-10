@@ -136,7 +136,7 @@ class Batch_norm(Layer):
         if self.moving_mean is None:
             self.moving_mean = self.mu
             self.moving_var = self.var
-            print('Moving averages initialised')
+            #print('Moving averages initialised')
 
             return output
 
