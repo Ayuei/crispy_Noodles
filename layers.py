@@ -51,7 +51,7 @@ class Dropout(Layer):
 
 class Dense(Layer):
 
-    def __init__(self, n=None, in_shape=None, activation="leaky_relu"):
+    def __init__(self, n=None, in_shape=None, activation="relu"):
         assert(n is not None)
         if activation in globals().keys():
             self.activation = globals()[activation]()
@@ -66,13 +66,8 @@ class Dense(Layer):
         if self.in_shape is None:
             self.in_shape = in_shape
 
-        #self.W = np.random.randn(self.in_shape, self.n)*np.sqrt(1/(self.n-1))
-        #self.b = np.array([np.random.randn()*np.sqrt(1/(self.n-1)) for i in
-        #                   range(self.n)])
-        
-        #CHANGE 6 ensure positive weights (original version is above)
-        self.W = np.random.randint(0, 100, size=(self.in_shape, self.n)) / 10000
-        self.b = np.array([np.random.randint(0, 100) / 1000 for i in range(self.n)])
+        self.W = np.random.randn(self.in_shape, self.n)*np.sqrt(1/(self.n-1))
+        self.b = np.atleast_2d(np.array([np.random.randn()*np.sqrt(1/(self.n-1)) for i in range(self.n)]))
 
         self.grad_W = np.zeros(self.W.shape)
         self.grad_b = np.zeros(self.b.shape)
@@ -82,7 +77,6 @@ class Dense(Layer):
         self.input = inp
 
         output = self.activation.activate(np.dot(inp, self.W)+self.b)
-
 
         self.output = output
 
@@ -94,7 +88,6 @@ class Dense(Layer):
             delta = delta*self.activation.deriv(self.output)
 
         self.grad_W = np.atleast_2d(self.input).T.dot(np.atleast_2d(delta))
-        self.grad_b = delta
-
+        self.grad_b = np.dot(np.ones((1, delta.shape[0]), dtype=np.float64), delta)
 
         return delta.dot(self.W.T)

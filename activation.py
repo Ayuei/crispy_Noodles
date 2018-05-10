@@ -45,11 +45,9 @@ class softmax():
 
     def activate(self, X):
 
-        exps = np.exp(X - np.max(X))
-        #x = np.max(X)
-        output = exps / np.sum(exps)
+        exps = np.exp(X)
 
-        return output
+        return exps/np.sum(exps, axis=1, keepdims=True)
 
     def __deriv__(self, X):
 

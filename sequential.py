@@ -6,7 +6,7 @@ from layers import *
 
 class Sequential():
 
-    def __init__(self, batch_size=50, learning_rate=0.001, epochs=100):
+    def __init__(self, batch_size=32, learning_rate=0.001, epochs=100):
         self.layers = []
         self.batch_size = batch_size
         self.epochs = epochs
@@ -36,18 +36,16 @@ class Sequential():
 
     def update(self):
         for layer in self.layers:
-            layer.W += self.learning_rate*layer.grad_W
-            layer.b += self.learning_rate*layer.grad_b
+            layer.W -= self.learning_rate*layer.grad_W
+            layer.b -= self.learning_rate*layer.grad_b
 
-    def compile(self, loss="cross_entropy", optimiser=None):
+    def compile(self, loss="cross_entropy_softmax", optimiser=None):
         if loss in globals().keys():
             self.loss = globals()[loss]()
         else:
             raise NotImplementedError()
 
     def fit(self, X, y):
-  
-        num_classes = len(np.unique(y))
         
         for k in range(self.epochs):
             print('Starting epoch: '+str(k))
@@ -69,7 +67,7 @@ class Sequential():
                 #CHANGE 5
                 if i % 1000 == 0:
                     print(y_hat)
-                    print('Loss at stoch item %s is %s' % (i, loss[i]))
+                    print('Loss at item %s is %s' % (i, loss[i]))
                 
                 self.backward(delta)
                 self.update()

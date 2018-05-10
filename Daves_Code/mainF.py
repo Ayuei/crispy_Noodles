@@ -41,20 +41,33 @@ def scale_data(data):
     X = scaler.transform(data)
     return X
 
+def getPredFrameAndScore(truth, preds):
+    combined = np.stack((truth, preds), axis=-1)
+    predictionFrame = pd.DataFrame(combined, columns=['Actual', 'Predicted'])
+    accuracy = np.sum(truth == preds) / len(preds)
+    return predictionFrame, accuracy
+   
+def generatePredictionScore(model, X, Y):
+    predictions = model.predict(X)
+    return getPredFrameAndScore(Y, predictions)
+    
 train, label, test = load_data(data_dir)
 
 X = scale_data(train)
 y = onehot_labels(label)
 
-layers_dim = [128, 5, 3, 10]
+Xtrain = X[:59000]
+Ytrain = y[:59000]
 
-#Based off the following implementation - https://github.com/pangolulu/neural-network-from-scratch
+Xtest = X[59000:60000] #unseen
+Ytest = np.array(label)[59000:60000] #unseen
+
+layers_dim = [128, 36, 22, 8, 10]
+
 model = nn.Model(layers_dim)
-model.train(X, y, num_passes=1000, epsilon=0.001, reg_lambda=0.01, print_loss=True)
+model.train(Xtrain, Ytrain, num_passes=3001, epsilon=0.0005, reg_lambda=0.02, print_loss=True)
 
-predictions = model.predict(X[0:500])
-lbls = np.array(label[0:500])
-combined = np.stack((lbls, predictions), axis=-1)
-predictionFrame = pd.DataFrame(combined, columns=['Actual', 'Predicted'])
-accuracy = np.sum(lbls == predictions) / len(predictions)
-print(accuracy)
+testUnseenFrame, testUnseenAcc = generatePredictionScore(model, Xtest, Ytest)
+
+#Review it's working by testing a subset of the train data
+testSeenFrame, testSeenAcc = generatePredictionScore(model, Xtrain[:5000], np.array(label)[:5000])

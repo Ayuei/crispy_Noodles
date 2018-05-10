@@ -48,6 +48,7 @@ def scale_data(data):
     scaler.fit(data)
     X = scaler.transform(data)
     return X
+
 config = json.load(open('config.json', 'r'))
 
 learning_rate = config['learning_rate']
@@ -57,35 +58,30 @@ data_dir = config['data_path']
 
 learning_rate = 0.001
 
-nn = Sequential(learning_rate=learning_rate, epochs=3)
+nn = Sequential(learning_rate=learning_rate, epochs=50)
 
 train, label, test = load_data(data_dir)
 
-nn.add(Dense(n=5, in_shape=train.shape[1]))
+nn.add(Dense(n=60, in_shape=train.shape[1]))
+nn.add(Dense(n=100))
+nn.add(Dropout(0.3))
+nn.add(Dense(n=100))
+nn.add(Dropout(0.3))
+nn.add(Dense(n=100))
+nn.add(Dropout(0.3))
+nn.add(Dense(n=100))
 nn.add(Dense(n=10, activation="softmax"))
 nn.compile(loss="cross_entropy_softmax")
 
 indices = list(range(len(train)))
 random.shuffle(indices)
 
-#CHANGE 1 - Using scaler instead in scale_data method
-#train = train / 255
 train = list(map(train.__getitem__, indices))
 label = list(map(label.__getitem__, indices))
 
-#test = train[50000:]
-#test_label = label[50000:]
-
-#CHANGE 2 - Converting data to np arrays and pass them directly rather than
-#doing it inside the fit method. (Allows rescaling to occur outside fit)
 X = scale_data(train)
-y = np.array(label, dtype=np.float64)
+y = np.array(onehot_labels(label), dtype=np.float64)
 
-nn.fit(X, y)
+nn.fit(X[0:50000], y[0:50000])
 
-print('Accuracy is: '+str(accuracy(nn, X, label)))
-
-
-#train, label, test = load_data(data_dir)
-
-#main(scale_data(train), onehot_labels(label))
+print('Accuracy is: '+str(accuracy(nn, X[50000:], label[50000:])))

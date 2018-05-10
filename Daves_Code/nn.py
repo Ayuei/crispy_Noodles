@@ -11,8 +11,13 @@ class Model:
         self.MB = MiniBatch()
         
         for i in range(len(layers_dim)-1):
-            wx = np.random.randint(0, 100, size=(layers_dim[i],  layers_dim[i+1])) / 10000
-            bx = np.atleast_2d(np.array([np.random.randint(0, 100) / 1000 for i in range(layers_dim[i+1])]))
+            #For TanH activation ensure weights are positive
+            #wx = np.random.randint(0, 100, size=(layers_dim[i],  layers_dim[i+1])) / 10000
+            #bx = np.atleast_2d(np.array([np.random.randint(0, 100) / 1000 for i in range(layers_dim[i+1])]))
+            
+            #For leaky relu we want both positive and negative weights
+            wx = np.random.randn(layers_dim[i], layers_dim[i+1]) / np.sqrt(layers_dim[i])
+            bx = np.atleast_2d(np.random.randn(layers_dim[i+1]).reshape(1, layers_dim[i+1]))
             self.layers.append(Layer(wx, bx))
  
     def calculate_loss(self, X, y):
@@ -57,7 +62,7 @@ class Model:
                     
             epochLoss.append(np.mean(batchLoss))
             
-            if print_loss and epoch % 50 == 0:
+            if print_loss and epoch % 100 == 0:
                 print("Loss after iteration %i: %f" %(epoch, self.calculate_loss(X, y)))
             
         return epochLoss

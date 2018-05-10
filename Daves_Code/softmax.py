@@ -10,24 +10,24 @@ class Softmax:
         probs = self.predict(X)
                 
         if y.ndim > 1:
-            yGuess  = np.argmax(y, axis=1)
+            yg  = np.argmax(y, axis=1)
         else:
-            yGuess  = y
+            yg  = y
             
-        corect_logprobs = -np.log(probs[range(num_examples), yGuess])
+        corect_logprobs = -np.log(probs[range(num_examples), yg])
         
-        data_loss = np.sum(corect_logprobs)
+        loss = np.mean(corect_logprobs) - 1
         
-        return 1./num_examples * data_loss
+        return loss
 
     def diff(self, X, y):
         num_examples = X.shape[0]
         probs = self.predict(X)
                 
         if y.ndim > 1:
-            yGuess  = np.argmax(y, axis=1)
+            yg  = np.argmax(y, axis=1)
         else:
-            yGuess  = y
+            yg  = y
                 
-        probs[range(num_examples), yGuess] -= 1
+        probs[range(num_examples), yg] -= 1
         return probs

@@ -22,9 +22,37 @@ class mean_squared_error(loss):
         return np.abs(y_hat - y)
 
 class cross_entropy_softmax(loss):
+
+    from copy import deepcopy
+
     def loss(self, y_hat, y):
-        print(y_hat)
-        return -np.sum(np.log(y_hat) * y)
+
+        num_examples = y_hat.shape[0]
+
+        probs = y_hat
+
+        if y.ndim > 1:
+            yGuess = np.argmax(y, axis=1)
+        else:
+            yGuess = y
+
+        corect_logprobs = -np.log(probs[range(num_examples), yGuess.astype(int)])
+
+        data_loss = np.sum(corect_logprobs)
+
+        return 1. / num_examples * data_loss
 
     def grad(self, y_hat, y):
-        return y_hat - y
+        m = y.shape[0]
+        yGuess = 0
+        if y.ndim > 1:
+            yGuess = (np.argmax(y, axis=1))
+        else:
+            yGuess = y
+
+        grad = np.array(y_hat, copy=True)
+
+        grad[range(m), yGuess.astype(int)] -= 1
+
+        grad = grad / m
+        return grad

@@ -130,7 +130,7 @@ class MLP:
     """
     """
 
-    def __init__(self, layers, activation='relu', last_activation='softmax'):
+    def __init__(self, layers, activation='leaky_relu', last_activation='softmax'):
         """
         :param layers: A list containing the number of units in each layer.
         Should be at least two values
