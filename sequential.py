@@ -1,21 +1,20 @@
-import numpy as np
-from activation import *
-from loss import *
 from layers import *
 from optimisers import *
-from copy import deepcopy
-
-global_time_step = 0
+from loss import *
+from activation import *
 
 class Sequential():
 
-    def __init__(self, batch_size=32, learning_rate=0.001, epochs=100, learning_rate_decay=1):
+    def __init__(self, batch_size=32, learning_rate=0.001, epochs=100, learning_rate_decay=1, weight_decay = 0):
         self.layers = []
         self.batch_size = batch_size
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.prev_n = None
         self.learning_rate_decay = learning_rate_decay
+        self.weight_decay = weight_decay
+        self.optimiser = None
+        self.loss = None
 
     def add(self, obj):
         obj.create_weights(self.prev_n)
@@ -33,33 +32,30 @@ class Sequential():
 
     def backward(self, delta):
         for i, layer in enumerate(reversed(self.layers)):
-            self.increment_global_time_step()
             if i == 0:
-                delta = layer.backward(delta, last_layer=True, global_time_step=global_time_step)
+                delta = layer.backward(delta, last_layer=True)
             else:
-                delta = layer.backward(delta, last_layer=False, global_time_step=global_time_step)
+                delta = layer.backward(delta, last_layer=False)
 
     def update(self):
         for layer in self.layers:
-            layer.update(self.learning_rate)
-
-
+            layer.update(self.learning_rate, self.weight_decay)
 
     def compile(self, loss="cross_entropy_softmax", optimiser=None):
         if loss in globals().keys():
             self.loss = globals()[loss]()
-
         else:
             raise NotImplementedError()
 
         if optimiser is None:
+            # Mini-batch
             return
 
         if optimiser in globals().keys():
             self.optimiser = globals()[optimiser]
             for i, layer in enumerate(self.layers):
                 if type(layer).__name__ == "Dense":
-                    self.layers[i] = self.optimiser(layer)
+                    self.layers[i] = self.optimiser(layer, weight_decay=self.weight_decay)
 
     def fit(self, X, y, verbose=True):
         
@@ -81,7 +77,7 @@ class Sequential():
                 loss[i] = np.mean(loss_)
 
                 if verbose:
-                    correct_instances += np.sum(np.argmax(y_hat,axis=1) == np.argmax(batch_Y,axis=1))
+                    correct_instances += np.sum(np.argmax(y_hat, axis=1) == np.argmax(batch_Y, axis=1))
 
                 delta = self.loss.grad(y_hat, batch_Y)
                 
@@ -92,13 +88,11 @@ class Sequential():
             print("Current mean loss:", np.mean(loss))
             if verbose:
                 print("Current training acc:", correct_instances/X.shape[0])
-            
-            
+
     def predict(self, x):
         x = np.array(x)
 
         return self.forward_pass(x, predict=True)
-
 
     def get_batches(self, X, Y):
         m = X.shape[0]
@@ -123,7 +117,3 @@ class Sequential():
             mini_batches.append(mini_batch)
 
         return mini_batches
-
-    def increment_global_time_step(self):
-        global global_time_step
-        global_time_step += 1

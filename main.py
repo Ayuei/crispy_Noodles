@@ -7,23 +7,24 @@ import random
 from layers import *
 #from keras_test import main
 
+
 def accuracy(nn_, test_, lbs_):
     score = 0
-    for x, label in zip(test_, lbs_):
-        #t = nn_.predict(x)
-        #dummy_var = np.argmax(nn_.predict(x))
-        if label == np.argmax(nn_.predict(x)):
+    for x, lbl in zip(test_, lbs_):
+        if lbl == np.argmax(nn_.predict(x)):
             score += 1
 
     return score/len(test_)
 
-#Returns onehot labels for multiclass classification
+
+# Returns onehot labels for multiclass classification
 def onehot_labels(test_label):
     lbls = np.array(test_label)
     onehot = np.zeros((lbls.size, lbls.max()+1)) 
     onehot[np.arange(lbls.size), lbls] = 1   
     return onehot
-    
+
+
 def load_data(data_dir='data/'):
     print(data_dir)
     data = []
@@ -41,12 +42,14 @@ def load_data(data_dir='data/'):
 
     return data, label, test
 
+
 def scale_data(data):
     X = np.array(data, dtype=np.float64)
     scaler = MinMaxScaler()
     scaler.fit(data)
     X = scaler.transform(data)
     return X
+
 
 config = json.load(open('config.json', 'r'))
 
@@ -55,24 +58,27 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-learning_rate = 0.001
+learning_rate = 0.01
 
-nn = Sequential(learning_rate=learning_rate, epochs=50, batch_size=100, learning_rate_decay=0.5)
+nn = Sequential(learning_rate=learning_rate, epochs=50, batch_size=100,
+                learning_rate_decay=0.9, weight_decay=0.001)
 
 train, label, test = load_data(data_dir)
 
+# Model in Keras-Style!
+
 nn.add(Dense(n=200, in_shape=train.shape[1]))
-nn.add(Batch_norm())
+nn.add(BatchNorm())
 nn.add(Dense(n=100))
-nn.add(Batch_norm())
+nn.add(BatchNorm())
 nn.add(Dense(n=60))
 nn.add(Dropout(0.5))
 nn.add(Dense(n=60))
-nn.add(Batch_norm())
+nn.add(BatchNorm())
 nn.add(Dense(n=100))
-nn.add(Batch_norm())
+nn.add(BatchNorm())
 nn.add(Dense(n=200))
-nn.add(Batch_norm())
+nn.add(BatchNorm())
 nn.add(Dense(n=10, activation="softmax"))
 nn.compile(loss="cross_entropy_softmax", optimiser="SGDMomentum")
 

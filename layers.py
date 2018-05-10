@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from activation import *
 import math
 
+
 class Layer(ABC):
     
     @abstractmethod
@@ -19,6 +20,7 @@ class Layer(ABC):
     @abstractmethod
     def update(self, *args):
         pass
+
 
 class Dropout(Layer):
 
@@ -70,6 +72,12 @@ class Dense(Layer):
         self.n = n
         self.loss = None
         self.in_shape = in_shape
+        self.W =  None
+        self.b = None
+        self.grad_W = None
+        self.grad_b = None
+        self.input = None
+        self.output = None
 
     def create_weights(self, in_shape):
 
@@ -102,22 +110,29 @@ class Dense(Layer):
 
         return delta.dot(self.W.T)
 
-    def update(self, learning_rate):
-        self.W -= learning_rate * self.grad_W
-        self.b -= learning_rate * self.grad_b
+    def update(self, lr, weight_decay):
+        self.W -= lr * self.grad_W - self.W*weight_decay*lr
+        self.b -= lr * self.grad_b - self.b*weight_decay*lr
 
 
-class Batch_norm(Layer):
+class BatchNorm(Layer):
     def __init__(self, epsilon=1e-16, momentum=0.9):
         self.epsilon=epsilon
         self.x_hat = None
         self.x_mu = None
         self.inv_var = None
+        self.gamma = None
+        self.beta = None
+        self.dbeta = None
+        self.dgamma = None
         self.sqrtvar = None
         self.var = None
         self.momentum = momentum
         self.moving_mean = None
         self.moving_var = None
+        self.X = None
+        self.X_norm = None
+        self.mu = None
 
     def forward(self, X, **kwargs):
 
@@ -136,7 +151,7 @@ class Batch_norm(Layer):
         if self.moving_mean is None:
             self.moving_mean = self.mu
             self.moving_var = self.var
-            #print('Moving averages initialised')
+            # print('Moving averages initialised')
 
             return output
 
@@ -162,9 +177,9 @@ class Batch_norm(Layer):
         return delta
 
     def create_weights(self, in_shape):
-        self.gamma = np.ones(shape=(in_shape))
-        self.beta = np.zeros(shape=(in_shape))
+        self.gamma = np.ones(shape=in_shape)
+        self.beta = np.zeros(shape=in_shape)
 
-    def update(self, learning_rate):
-        self.gamma -= learning_rate*self.dgamma
-        self.beta -= learning_rate*self.dbeta
+    def update(self, lr, wd):
+        self.gamma -= lr*self.dgamma - self.gamma*wd*lr
+        self.beta -= lr*self.dbeta - self.beta*wd*lr
