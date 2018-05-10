@@ -9,12 +9,13 @@ global_time_step = 0
 
 class Sequential():
 
-    def __init__(self, batch_size=32, learning_rate=0.001, epochs=100):
+    def __init__(self, batch_size=32, learning_rate=0.001, epochs=100, learning_rate_decay=1):
         self.layers = []
         self.batch_size = batch_size
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.prev_n = None
+        self.learning_rate_decay = learning_rate_decay
 
     def add(self, obj):
         obj.create_weights(self.prev_n)
@@ -63,6 +64,9 @@ class Sequential():
     def fit(self, X, y, verbose=True):
         
         for k in range(self.epochs):
+
+            self.learning_rate = self.learning_rate*self.learning_rate_decay
+
             print('=====================')
             print('EPOCH: '+str(k)+'/'+str(self.epochs))
             loss = np.zeros(X.shape[0])

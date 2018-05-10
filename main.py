@@ -57,7 +57,7 @@ data_dir = config['data_path']
 
 learning_rate = 0.001
 
-nn = Sequential(learning_rate=learning_rate, epochs=50, batch_size=100)
+nn = Sequential(learning_rate=learning_rate, epochs=50, batch_size=100, learning_rate_decay=0.5)
 
 train, label, test = load_data(data_dir)
 
