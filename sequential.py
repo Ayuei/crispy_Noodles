@@ -43,7 +43,7 @@ class Sequential():
 
     def compile(self, loss="cross_entropy_softmax", optimiser=None):
         if loss in globals().keys():
-            self.loss = globals()[loss]()
+            self.loss = globals()[loss](self.layers[-1].activation)
         else:
             raise NotImplementedError()
 
@@ -79,7 +79,7 @@ class Sequential():
                 if verbose:
                     correct_instances += np.sum(np.argmax(y_hat, axis=1) == np.argmax(batch_Y, axis=1))
 
-                delta = self.loss.grad(y_hat, batch_Y)
+                delta = self.loss.grad(y_hat, batch_Y, self.layers[-1])
                 
                 self.backward(delta)
                 self.update()

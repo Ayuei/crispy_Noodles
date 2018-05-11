@@ -34,12 +34,16 @@ class Adam(Optimiser):
         self.layer = layer
         self.epsilon = epsilon
         self.weight_decay = weight_decay
+        self.input = None
+        self.output = None
 
     def backward(self, delta, **kwargs):
 
         last_layer = kwargs["last_layer"]
 
         delta = self.layer.backward(delta, last_layer)
+
+        self.output = self.layer.output
 
         # Increment time-step for Adam
         self.t += 1
@@ -60,7 +64,10 @@ class Adam(Optimiser):
         return delta
 
     def forward(self, X, **kwargs):
-        return self.layer.forward(X)
+        self.input = X
+        output = self.layer.forward(X)
+        self.output = output
+        return output
 
     def update(self, lr, *args, **kwargs):
         self.layer.W = self.layer.W - (lr * (self.vcW / (np.sqrt(self.scW) + self.epsilon))) - \
@@ -77,9 +84,14 @@ class SGDMomentum(Optimiser):
         self.velocity = None
         self.velocity_b = None
         self.weight_decay = weight_decay
+        self.input = None
+        self.output = None
 
     def forward(self, x, **kwargs):
-        return self.layer.forward(x)
+        self.input = x
+        output = self.layer.forward(x)
+        self.output = output
+        return output
 
     def backward(self, delta, **kwargs):
         last_layer = kwargs["last_layer"]

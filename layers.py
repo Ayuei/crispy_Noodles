@@ -36,6 +36,7 @@ class Dropout(Layer):
         self.b = 0
         self.grad_W = 0
         self.grad_b = 0
+        self.output = None
 
     def forward(self, inp, **kwargs):
 
@@ -48,6 +49,8 @@ class Dropout(Layer):
 
         for i in range(int(stop)):
             inp[:, indices[i]] = np.zeros(inp.shape[0])
+
+        self.output = inp
 
         return inp
 
@@ -133,6 +136,7 @@ class BatchNorm(Layer):
         self.X = None
         self.X_norm = None
         self.mu = None
+        self.output = None
 
     def forward(self, X, **kwargs):
 
@@ -147,6 +151,8 @@ class BatchNorm(Layer):
             self.X_norm = (X - self.moving_mean) * 1.0 / np.sqrt(self.moving_var + self.epsilon)
 
         output = self.X_norm * self.gamma + self.beta
+
+        self.output = output
 
         if self.moving_mean is None:
             self.moving_mean = self.mu

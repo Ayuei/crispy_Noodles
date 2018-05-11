@@ -45,7 +45,7 @@ class softmax():
 
     def activate(self, X):
 
-        exps = np.exp(X)
+        exps = np.exp(X-np.max(X))
 
         return exps/np.sum(exps, axis=1, keepdims=True)
 
@@ -56,3 +56,24 @@ class softmax():
         X = self.activate(X)
 
         return np.diagflat(X) - np.dot(X, X.T)
+
+class logistic():
+
+    def activate(self, X):
+
+        return 1.0 / (1.0 + np.exp(-X))
+
+    def deriv(self, X):
+
+        X = self.activate(X)
+
+        return X * (1 - X)
+
+class tanh():
+
+    def activate(self, X):
+        return np.tanh(X)
+
+    def deriv(self, X):
+        X = self.activate(X)
+        return 1.0 - np.power(X, 2)

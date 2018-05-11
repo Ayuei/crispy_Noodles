@@ -58,29 +58,28 @@ epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
 
-learning_rate = 0.01
+learning_rate = 0.001
 
-nn = Sequential(learning_rate=learning_rate, epochs=50, batch_size=100,
-                learning_rate_decay=0.9, weight_decay=0.001)
+nn = Sequential(learning_rate=learning_rate, epochs=100, batch_size=100,
+                learning_rate_decay=1.0, weight_decay=0.001)
 
 train, label, test = load_data(data_dir)
 
 # Model in Keras-Style!
 
+learning_rate = 0.001
+
+nn = Sequential(learning_rate=learning_rate, epochs=100, batch_size=100,
+                learning_rate_decay=0.95, weight_decay=0.001)
+
 nn.add(Dense(n=200, in_shape=train.shape[1]))
-nn.add(BatchNorm())
-nn.add(Dense(n=100))
-nn.add(BatchNorm())
-nn.add(Dense(n=60))
-nn.add(Dropout(0.5))
-nn.add(Dense(n=60))
 nn.add(BatchNorm())
 nn.add(Dense(n=100))
 nn.add(BatchNorm())
 nn.add(Dense(n=200))
 nn.add(BatchNorm())
 nn.add(Dense(n=10, activation="softmax"))
-nn.compile(loss="cross_entropy_softmax", optimiser="SGDMomentum")
+nn.compile(loss="cross_entropy_softmax", optimiser="Adam")
 
 indices = list(range(len(train)))
 random.shuffle(indices)
