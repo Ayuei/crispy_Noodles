@@ -7,7 +7,7 @@ import random
 from layers import *
 import pickle
 
-epochs = 100
+epochs = 10
 
 def accuracy_per_class(nn_, test_, lbs_):
     classes_score = np.array([0 for i in range(len(lbs_[0]))])
@@ -78,7 +78,7 @@ learning_rate = config['learning_rate']
 #epochs = config['epochs']
 graph = config['graph']
 data_dir = config['data_path']
-load_pre_trained = False
+load_pre_trained = True
 
 learning_rate = 0.001
 
@@ -175,10 +175,14 @@ if load_pre_trained:
     ensemble = [model for model in [model_adam(train_set[0], train_set[1], True),
                                     model_adam_dropout(train_set[0], train_set[1], True),
                                     model_SGD(train_set[0], train_set[1], True)]]
-else:
     import glob
+
     for model in glob.glob('trained_models/'):
         ensemble.append(pickle.load(open(model, 'rb')))
+else:
+    ensemble = [model for model in [model_adam(train_set[0], train_set[1], True),
+                                    model_adam_dropout(train_set[0], train_set[1], True),
+                                    model_SGD(train_set[0], train_set[1], True)]]
 
 validation_set = X[48000:50000], y[48000:50000]
 test_set = X[50000:], y[50000:]
@@ -213,10 +217,10 @@ preds = np.sum(preds, axis=0)/len(ensemble)
 
 preds_weighted = np.array(preds_weighted).T
 
-model_names = ["adam", "adam_dropout", "sgdmomentum"]
+model_names = ["adam1", "adam_dropout1", "sgdmomentum1"]
 
 for model, name in zip(ensemble, model_names):
     pickle.dump(model, open('trained_models/'+name+".model", 'wb+'))
 
-print('Non-weighted:', raw_accuracy(preds, test_set[1]))
-print('Weighted:', raw_accuracy(preds_weighted, test_set[1]))
+print('Non-weighted Ensemble Prediction:', raw_accuracy(preds, test_set[1]))
+print('Weighted Ensemble Prediction:', raw_accuracy(preds_weighted, test_set[1]))
